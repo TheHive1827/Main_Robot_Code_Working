@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 
 /**
@@ -18,6 +19,7 @@ import frc.robot.subsystems.ElevatorSubsystem;
 public class Robot extends TimedRobot {
     private Command m_autonomousCommand;
     private final ElevatorSubsystem m_Elevator = new ElevatorSubsystem();
+    private final ArmSubsystem m_Arm = new ArmSubsystem();
     private RobotContainer m_robotContainer;
 
     /**
@@ -85,12 +87,14 @@ public class Robot extends TimedRobot {
     public void teleopPeriodic() {
         m_Elevator.configureBindings();
         m_Elevator.periodic();
+        m_Arm.periodic();
     }
 
     @Override
     public void testInit() {
         // Cancels all running commands at the start of test mode.
         CommandScheduler.getInstance().cancelAll();
+        m_Arm.resetEncoders();
     }
 
     /** This function is called periodically during test mode. */

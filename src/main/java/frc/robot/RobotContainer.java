@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import frc.robot.commands.ManualDrive;
+import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.Swerve;
 
@@ -14,6 +15,7 @@ import frc.robot.subsystems.Swerve;
 public class RobotContainer {
     // The robot's subsystems and commands are defined here...
     private final XboxController mController = new XboxController(Constants.kControllerPort);
+    private final ArmSubsystem m_Arm = new ArmSubsystem();
     private final Swerve mSwerve = new Swerve();
 
     // Create new instance of ManualDrive, passing Swerve and Controller as parameters

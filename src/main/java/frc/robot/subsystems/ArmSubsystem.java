@@ -14,7 +14,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.ArmConstants;
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants;
 
@@ -34,13 +36,27 @@ import com.ctre.phoenix6.hardware.CANcoder;
 // import swervelib.encoders.CANCoderSwerve;
 
 
-public class ArmSubsystem { // Initializing physical swerve modules
-  private final SparkMax m_ArmMotor;
-  private double m_ArmEncoderPosition;
+public class ArmSubsystem extends SubsystemBase{ // Initializing physical swerve modules
+    private final static SparkMax m_ArmMotor = new SparkMax(ArmConstants.armID, MotorType.kBrushless);
+  private double m_EncoderValue = m_ArmMotor.getEncoder().getPosition();
+  private RelativeEncoder m_ArmEncoder = m_ArmMotor.getEncoder();
   private PIDController m_controller;
   int Position;
   int SetPoint;
-  
+  double Speed;
+  ProfiledPIDController testname = new ProfiledPIDController(0.0,
+          0.0,
+          0.0, ArmConstants.MOVEMENT_CONSTRAINTS);
+//    testname.setReference(setPoint, SparkBase.ControlType.kMAXMotionPositionControl);
+  public void Periodic(){
+    double m_EncoderValue = m_ArmMotor.getEncoder().getPosition();
+    SmartDashboard.putNumber("arm encoder",m_EncoderValue);
+    
+  }
+
+  public void resetEncoders(){
+    m_ArmEncoder.setPosition(0);
+  }
 
   /**
    * Constructs a MAXSwerveModule and configures the driving and turning motor,
@@ -48,23 +64,12 @@ public class ArmSubsystem { // Initializing physical swerve modules
    * MAXSwerve Module built with NEOs, SPARKS MAX, and a Through Bore
    * Encoder.
    */
-  public ArmSubsystem(){
-    m_ArmMotor = new SparkMax(ArmConstants.armID, MotorType.kBrushless);
-    SmartDashboard.putNumber("Wowzers", m_ArmEncoderPosition);
-    m_ArmEncoderPosition = m_ArmMotor.getEncoder().getPosition();
-    int Position;
-    private ProfiledPIDController final pidController = new ProfiledPIDController(SwerveConstants.kRotor_kP,
-            SwerveConstants.kRotor_kI,
-            SwerveConstants.kRotor_kD, ArmConstants.MOVEMENT_CONSTRAINTS);
-            
-    m_controller = new PIDController(SwerveConstants.kRotor_kP,
-            SwerveConstants.kRotor_kI,
-            SwerveConstants.kRotor_kD);
-   m_controller.setReference(setPoint, SparkBase.ControlType.kMAXMotionPositionControl);
-  }
 
-  public Command ArmSetCommand(double Position) {
-    return runOnce(() ->m_controller.setReference(Position, SparkBase.ControlType.kMAXMotionPositionControl););
+
+
+  public Command armCommand(Double Voltage) {
+    return runOnce(() -> m_ArmMotor.set(testname.calculate(m_ArmEncoder.getPosition(), 223232)))
+    .andThen(()-> m_ArmMotor.set(1.0));
     }
 
   public void start(){
