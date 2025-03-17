@@ -9,12 +9,14 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 
 
 public final class Constants {
 
     // Swerve constants
+
     public static final class SwerveConstants {
 
         // Rotor IDs
@@ -114,4 +116,29 @@ public final class Constants {
     public static final int kControllerPort = 0;
 
     public static final double kLongTimeoutMs = 100.;
+
+    public static final class OIConstants {
+        public static final int kDriverControllerPort = 0;
+        public static final double kDriveDeadband = 0.05;
+      }
+
+      public static final class ElevatorConstants{
+        public static final int ElevatorLeader = 10;
+
+      }
+
+      public static final class ArmConstants{
+        public static final int armID = 11;
+        public static final double MAX_DRIVING_VELOCITY_METERS_PER_SECOND = 5;
+        public static final double MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED = 8;
+        public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = 20;
+        public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 40;
+
+        public static final TrapezoidProfile.Constraints MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
+                MAX_DRIVING_VELOCITY_METERS_PER_SECOND,
+                MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED);
+        public static final TrapezoidProfile.Constraints ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(
+                MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+                MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED);
+      }
 }
