@@ -32,17 +32,17 @@ import frc.robot.Constants;
 import frc.robot.Constants.SwerveConstants;
 
 public class SwerveModule {
-     // 初始化 rotor & throttle 馬達
+     //rotor & throttle
     private SparkMax mRotor;
     private SparkMax mThrottle;
 
-    // 初始化 throttle encoder
+    //  throttle encoder
     private RelativeEncoder mThrottleEncoder;
 
-    // 初始化 rotor encoder
+    // rotor encoder
     private CANcoder mRotorEncoder;
 
-    // 初始化 rotor PID controller
+    // rotor PID controller
     private PIDController mRotorPID;
 
     private String m_name;
@@ -51,12 +51,12 @@ public class SwerveModule {
     public SparkMaxConfig turningConfig = new SparkMaxConfig();
 
     /**
-     * 構建新的 SwerveModule
+     * SwerveModule
      *
-     * @param throttleID CAN ID of throttle 馬達
-     * @param rotorID CAN ID of rotor 馬達
+     * @param throttleID CAN ID of throttle
+     * @param rotorID CAN ID of rotor
      * @param rotorEncoderID CAN ID of rotor encoder
-     * @param rotorMagnetOffset rotor encoder 偏移量
+     * @param rotorMagnetOffset rotor encoder
      */
     public SwerveModule(int throttleID, int rotorID, int rotorEncoderID, double rotorMagnetOffset)
     {
@@ -79,24 +79,21 @@ public class SwerveModule {
 
         mRotor.configure(turningConfig, null, null);
 
-        // 根據之前的常數配置轉向 rotor encoder
         MagnetSensorConfigs magnetSensorConfigs = new MagnetSensorConfigs();
         // magnetSensorConfigs.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
         magnetSensorConfigs.SensorDirection = SwerveConstants.kRotorEncoderDirection;
         magnetSensorConfigs.MagnetOffset = rotorMagnetOffset;
         mRotorEncoder.getConfigurator().apply(new CANcoderConfiguration().withMagnetSensor(magnetSensorConfigs), Constants.kLongTimeoutMs);
 
-        // 根據之前的常數配置 rotor 馬達的PID控制器
         mRotorPID = new PIDController(
             SwerveConstants.kRotor_kP,
             SwerveConstants.kRotor_kI,
             SwerveConstants.kRotor_kD
         );
 
-        // ContinuousInput 認為 min 和 max 是同一點並且自動計算到設定點的最短路線
+        // ContinuousInput
         mRotorPID.enableContinuousInput(-180, 180);
 
-        // 根據之前的常數配置 throttle 馬達
         mThrottle.configure(drivingConfig, null, null);
 
         if (rotorEncoderID == 1) {
@@ -147,12 +144,10 @@ public class SwerveModule {
      * @param state module state 
      */
     public void setState(SwerveModuleState state) {
-        // 優化狀態，使轉向馬達不必旋轉超過 90 度來獲得目標的角度
         SmartDashboard.putNumber(m_name + " state angle: ", state.angle.getDegrees());
         SwerveModuleState optimizedState = state;
         optimizedState.optimize(getState().angle);
         
-        // 通過比較目前角度與目標角度來用 PID 控制器計算轉向馬達所需的輸出
         SmartDashboard.putNumber(m_name + " current angle: ", getState().angle.getDegrees());
         SmartDashboard.putNumber(m_name + " optimized angle: ", optimizedState.angle.getDegrees());
         double rotorOutput = mRotorPID.calculate(getState().angle.getDegrees(), optimizedState.angle.getDegrees());

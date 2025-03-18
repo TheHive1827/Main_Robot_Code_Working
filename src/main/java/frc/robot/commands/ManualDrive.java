@@ -14,7 +14,6 @@ public class ManualDrive extends Command {
         mController = controller;
 
         // Adds the Swerve subsystem as a requirement to the command
-        // 加入 swerve 為這條命令的必要條件
         addRequirements(mSwerve);
     }
 
