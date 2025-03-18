@@ -94,30 +94,4 @@ public class ElevatorSubsystem extends SubsystemBase {
           } 
         
       }
-
-//   public Command goUp2Command() {
-//         return this.runOnce(() -> mainElevatorMotorLeader.set(1));
-//   }
-
-//   public void goUpCommand() {
-//     if (ElevatorRawEncoderValue < 0) {
-//         mainElevatorMotorLeader.set(-1);
-//         mainElevatorMotorFollower.set(-1);
-//     } else {
-//         mainElevatorMotorLeader.set(0);
-//         mainElevatorMotorFollower.set(0);
-//   }
-// }
-
-//   public void goDownCommand() {
-//     if (ElevatorRawEncoderValue < 0) {
-//         mainElevatorMotorLeader.set(-1);
-//         mainElevatorMotorFollower.set(-1);
-//     } else {
-//         mainElevatorMotorLeader.set(0);
-//         mainElevatorMotorFollower.set(0);
-//   }
-// }
-
-
 }
