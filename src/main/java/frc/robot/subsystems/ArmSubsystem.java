@@ -10,6 +10,7 @@ import java.io.File;
 import java.util.Set;
 
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -41,21 +42,54 @@ public class ArmSubsystem extends SubsystemBase{ // Initializing physical swerve
   private double m_EncoderValue = m_ArmMotor.getEncoder().getPosition();
   private RelativeEncoder m_ArmEncoder = m_ArmMotor.getEncoder();
   private PIDController m_controller;
-  int Position;
+  static CommandXboxController ElevatorController = new CommandXboxController(1);
+   XboxController exampleXbox = new XboxController(1); // 0 is the USB Port to be used as indicated on the Driver Station
+  
+  double goal;
   int SetPoint;
   double Speed;
+  double Direction;
   ProfiledPIDController testname = new ProfiledPIDController(0.0,
           0.0,
           0.0, ArmConstants.MOVEMENT_CONSTRAINTS);
-//    testname.setReference(setPoint, SparkBase.ControlType.kMAXMotionPositionControl);
-  public void Periodic(){
+  //  testname.setReference(setPoint, SparkBase.ControlType.kMAXMotionPositionControl);
+  public void ArmPeriodic(){
     double m_EncoderValue = m_ArmMotor.getEncoder().getPosition();
     SmartDashboard.putNumber("arm encoder",m_EncoderValue);
+    SmartDashboard.putNumber("POV Button Angle",exampleXbox.getPOV());
+    SmartDashboard.putNumber("Arm Goal",goal);
+    SmartDashboard.putNumber("Arm Speed",m_ArmMotor.get());
+    SmartDashboard.putNumber("ArmDirection",Direction);
+    double LessRange = goal - 0.01;
+    double MoreRange = goal + 0.01;
+    Boolean InRange;
+     if (LessRange < m_EncoderValue){
+      if (m_EncoderValue < MoreRange){
+        InRange = true;
+      } else {
+        InRange = false;
+      }
+     } else {
+      InRange = false;
+     }
+    // 0 = top, right = 90, bottom = 180, yada yada you should know how angles work
+    if (m_EncoderValue < goal && InRange == false){
+      Direction = 0.3;
+      SmartDashboard.putString("Run or Nah","SHOULD BE RUNNING");
+    } else if (m_EncoderValue > goal && InRange == false ){
+      Direction = -0.3;
+      SmartDashboard.putString("Run or Nah","SHOULD BE RUNNING");
+    } else {
+      Direction = 0.0;
+      SmartDashboard.putString("Run or Nah","SHOULD NOT BE RUNNING");
+    }
+    RunMotor(Direction);
     
   }
 
   public void resetEncoders(){
     m_ArmEncoder.setPosition(0);
+    goal = 0;
   }
 
   /**
@@ -65,14 +99,34 @@ public class ArmSubsystem extends SubsystemBase{ // Initializing physical swerve
    * Encoder.
    */
 
+public void configureBindings(){
+        if (exampleXbox.getPOV() == 90){
+          ElevatorController.pov(90).whileTrue(SetPosition(0.4));
+          goal = 0.4;
+        } else {
+          ;
+        }
 
+        if (exampleXbox.getPOV() == 180){
+          ElevatorController.pov(-1).whileTrue(SetPosition(0.8));
+          goal = 0.8;
+        } else {
+          ;
+        }
 
-  public Command armCommand(Double Voltage) {
-    return runOnce(() -> m_ArmMotor.set(testname.calculate(m_ArmEncoder.getPosition(), 223232)))
-    .andThen(()-> m_ArmMotor.set(1.0));
+        if (exampleXbox.getPOV() == 0){
+          ElevatorController.pov(-1).whileTrue(SetPosition(0));
+          goal = 0;
+        } else {
+          ;
+        }
+}
+
+  public Command SetPosition(double setgoal) {
+      return runOnce(() -> m_ArmMotor.set(testname.calculate(m_ArmEncoder.getPosition(), setgoal)));
     }
 
-  public void start(){
-    Position = 1;
-  }
+    public void RunMotor(double speed){
+      m_ArmMotor.set(speed);
+    }
 }

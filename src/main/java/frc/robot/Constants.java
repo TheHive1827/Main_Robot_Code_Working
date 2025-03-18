@@ -128,7 +128,9 @@ public final class Constants {
       }
 
       public static final class ArmConstants{
-        public static final int armID = 11;
+        public static final int armID = 12;
+        public static final double armMAXWhen = 0.619048;
+        public static final double armMinimum = 0.619048;
         public static final double MAX_DRIVING_VELOCITY_METERS_PER_SECOND = 5;
         public static final double MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED = 8;
         public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = 20;
