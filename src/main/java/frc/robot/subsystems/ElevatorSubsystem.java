@@ -9,9 +9,11 @@ import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.OIConstants;
 
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.sim.SparkAbsoluteEncoderSim;
 import com.revrobotics.sim.SparkMaxAlternateEncoderSim;
 import com.revrobotics.spark.SparkAbsoluteEncoder;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
@@ -19,6 +21,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkMaxAlternateEncoder;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.ctre.phoenix.motorcontrol.IFollower;
 import com.revrobotics.*;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -34,32 +37,28 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 public class ElevatorSubsystem extends SubsystemBase {
     static CommandXboxController ElevatorController = new CommandXboxController(1);
   XboxController exampleXbox = new XboxController(1); // 0 is the USB Port to be used as indicated on the Driver Station
-  private final static SparkMax elevatorMotorLeader = new SparkMax(ElevatorConstants.ElevatorLeader, MotorType.kBrushless);
+  public final static SparkMax elevatorMotorLeader = new SparkMax(ElevatorConstants.ElevatorLeader, MotorType.kBrushless);
+  SparkClosedLoopController elevatorPID = elevatorMotorLeader.getClosedLoopController();
+  public static SparkMaxConfig config = new SparkMaxConfig();
   private final static AbsoluteEncoder motorLeaderEncoder = elevatorMotorLeader.getAbsoluteEncoder();
+  private final static int setPoint = 0;
   double ElevatorEncoderValue = motorLeaderEncoder.getPosition();
   boolean ButtonA = exampleXbox.getAButtonPressed();
   boolean ButtonY = exampleXbox.getYButtonPressed();
   boolean ButtonX = exampleXbox.getXButtonPressed();
   boolean ButtonB = exampleXbox.getBButtonPressed();
-  
 
+  public ElevatorSubsystem(){
+    config.closedLoop
+    .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+    .p(0.01)
+    .i(0.0)
+    .d(0.0)
+    .outputRange(-1, 1);
+    elevatorPID.setReference(setPoint, ControlType.kPosition);
 
-
-  /**
-   * Example comman+d factory method.
-   *
-   * @return a command
-
-
-  /**
-   * An example method querying a boolean state of the subsystem (for example, a digital sensor).
-   *
-   * @return value of some boolean subsystem state, such as a digital sensor.
-   */
-//   public boolean exampleCondition() {
-//     // Query some boolean state, such as a digital sensor.
-//     return false;
-//   }
+    elevatorMotorLeader.configure(config, null, null);
+  }
 
   @Override
   public void periodic() {
@@ -69,11 +68,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("elevator encoder ig",ElevatorEncoderValue);
         SmartDashboard.putBoolean("A", ButtonA);
         SmartDashboard.putBoolean("Y", ButtonY);}
-
-  @Override
-  public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
-  }
 
   public Command ElevatorCommand(double speed) {
     return runOnce(() -> elevatorMotorLeader.set(speed));

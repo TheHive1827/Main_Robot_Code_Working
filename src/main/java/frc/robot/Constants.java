@@ -66,6 +66,11 @@ public final class Constants {
         public static final double kRotor_kI = 0.0;
         public static final double kRotor_kD = 0.0;
 
+        // elevator PID
+        public static final double kElevatorP = 0.01;
+        public static final double kElevatorI = 0.0;
+        public static final double kElevatorD = 0.0;
+
         // Velocity & acceleration of swerve
         public static final double kMaxVelocityMetersPerSecond = 3.0;
         public static final double kMaxAccelerationMetersPerSecond = 3.0;
