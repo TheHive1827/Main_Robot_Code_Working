@@ -12,6 +12,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.sim.SparkAbsoluteEncoderSim;
 import com.revrobotics.sim.SparkMaxAlternateEncoderSim;
 import com.revrobotics.spark.SparkAbsoluteEncoder;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
@@ -19,6 +20,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkMaxAlternateEncoder;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.ctre.phoenix.motorcontrol.IFollower;
 import com.revrobotics.*;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -32,64 +34,64 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 
 public class ElevatorSubsystem extends SubsystemBase {
-    static CommandXboxController ElevatorController = new CommandXboxController(1);
+  static CommandXboxController ElevatorController = new CommandXboxController(1);
   XboxController exampleXbox = new XboxController(1); // 0 is the USB Port to be used as indicated on the Driver Station
-  private final static SparkMax elevatorMotorLeader = new SparkMax(ElevatorConstants.ElevatorLeader, MotorType.kBrushless);
-  private final static AbsoluteEncoder motorLeaderEncoder = elevatorMotorLeader.getAbsoluteEncoder();
-  double ElevatorEncoderValue = motorLeaderEncoder.getPosition();
+  private final static SparkMax elevatorMotor = new SparkMax(ElevatorConstants.ElevatorLeader, MotorType.kBrushless);
+  private final static RelativeEncoder elevatorMotorEncoder = elevatorMotor.getEncoder();
+  public static SparkClosedLoopController m_elevatorPID = elevatorMotor.getClosedLoopController();
+  double ElevatorEncoderValue = elevatorMotorEncoder.getPosition();
   boolean ButtonA = exampleXbox.getAButtonPressed();
   boolean ButtonY = exampleXbox.getYButtonPressed();
   boolean ButtonX = exampleXbox.getXButtonPressed();
   boolean ButtonB = exampleXbox.getBButtonPressed();
-  
 
-
-
-  /**
-   * Example comman+d factory method.
-   *
-   * @return a command
-
-
-  /**
-   * An example method querying a boolean state of the subsystem (for example, a digital sensor).
-   *
-   * @return value of some boolean subsystem state, such as a digital sensor.
-   */
-//   public boolean exampleCondition() {
-//     // Query some boolean state, such as a digital sensor.
-//     return false;
-//   }
+  public void ElevatorInit(){
+    final SparkMaxConfig config = new SparkMaxConfig();
+    config.closedLoop
+    .p(0.000001)
+    .i(0.0)
+    .d(0.0)
+    .velocityFF(1/473)
+    .outputRange(ElevatorConstants.ElevatorMin, ElevatorConstants.ElevatorMax);
+    elevatorMotor.configure(config, null, null);
+    elevatorMotorEncoder.setPosition(0);
+  }
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
     ButtonA = exampleXbox.getAButtonPressed();
-        ButtonY = exampleXbox.getYButtonPressed();
-        SmartDashboard.putNumber("elevator encoder ig",ElevatorEncoderValue);
-        SmartDashboard.putBoolean("A", ButtonA);
-        SmartDashboard.putBoolean("Y", ButtonY);}
-
-  @Override
-  public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
-  }
+    ButtonY = exampleXbox.getYButtonPressed();
+    SmartDashboard.putNumber("Elevator encoder", elevatorMotorEncoder.getPosition());
+    SmartDashboard.putBoolean("A", ButtonA);
+    SmartDashboard.putBoolean("Y", ButtonY);}
 
   public Command ElevatorCommand(double speed) {
-    return runOnce(() -> elevatorMotorLeader.set(speed));
+    return runOnce(() -> elevatorMotor.set(speed));
     }
+
+  public Command ElevatorDown(double speed) {
+    return runOnce(() -> elevatorMotor.set(-speed));
+  }
+
+  public Command ElevatorGoToPoint(double setPoint){
+    return runOnce(() -> m_elevatorPID.setReference(setPoint, ControlType.kVelocity));
+  }
+
 
     public void configureBindings() {
         ButtonA = exampleXbox.getAButtonPressed();
         ButtonY = exampleXbox.getYButtonPressed();
-          if (ButtonA == false && ButtonY == false){
+        ButtonX = exampleXbox.getXButtonPressed();
+          if (ButtonA == false && ButtonY == false && ButtonX == false){
             ElevatorController.y().whileFalse(ElevatorCommand(0));
             ElevatorController.a().whileFalse(ElevatorCommand(0));
+            ElevatorController.x().whileFalse(ElevatorGoToPoint(0));
             // when both of them are NOT being pressed, when either of them are NOT ebing pressed it stops the motors.
           }
            else {
             ElevatorController.a().whileTrue(ElevatorCommand(-0.1));
             ElevatorController.y().whileTrue(ElevatorCommand(0.1));
+            ElevatorController.x().whileFalse(ElevatorGoToPoint(ElevatorConstants.ElevatorMax));
             // 
           } 
         

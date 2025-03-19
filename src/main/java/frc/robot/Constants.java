@@ -124,6 +124,11 @@ public final class Constants {
 
       public static final class ElevatorConstants{
         public static final int ElevatorLeader = 10;
+        public static final double ElevatorMin = 5.738089;
+        public static final double ElevatorMax = 35.880615;
+        public static final double ElevatorScoreCoral = 16.095222;
+        public static final double ElevatorGetCoralUp = 22.809401;
+        public static final double ElevatorGetCoralDown = 10.428621;
 
       }
 
