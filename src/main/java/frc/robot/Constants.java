@@ -142,4 +142,8 @@ public final class Constants {
                 MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
                 MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED);
       }
+
+      public static final class IntakeConstants{
+        public static final int intakeID = 11;
+      }
 }

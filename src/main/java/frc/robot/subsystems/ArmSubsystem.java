@@ -42,7 +42,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 public class ArmSubsystem extends SubsystemBase{
 // i love dry paint
 
-    private final static SparkMax m_ArmMotor = new SparkMax(ArmConstants.armID, MotorType.kBrushless);
+  private final static SparkMax m_ArmMotor = new SparkMax(ArmConstants.armID, MotorType.kBrushless);
   private double m_EncoderValue = m_ArmMotor.getEncoder().getPosition();
   private RelativeEncoder m_ArmEncoder = m_ArmMotor.getEncoder();
   // private PIDController m_controller;
@@ -57,12 +57,12 @@ public class ArmSubsystem extends SubsystemBase{
 
 
 // Set PID gains
-PIDController PIDController = new PIDController(
-            SwerveConstants.kRotor_kP,
-            SwerveConstants.kRotor_kI,
-            SwerveConstants.kRotor_kD
-        );
-  double goal;
+// PIDController PIDController = new PIDController(
+//             SwerveConstants.kRotor_kP,
+//             SwerveConstants.kRotor_kI,
+//             SwerveConstants.kRotor_kD
+//         );
+  double goal = 0;
   int SetPoint;
   double Speed;
   double Direction;
@@ -83,9 +83,9 @@ PIDController PIDController = new PIDController(
      * needed, we can adjust values like the position or velocity conversion
      * factors.
      */
-    motorConfig.encoder
-        .positionConversionFactor(1)
-        .velocityConversionFactor(1);
+    // motorConfig.encoder
+    //     .positionConversionFactor(1)
+    //     .velocityConversionFactor(1);
 
     /*
      * Configure the closed loop controller. We want to make sure we set the
@@ -95,16 +95,16 @@ PIDController PIDController = new PIDController(
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         // Set PID values for position control. We don't need to pass a closed loop
         // slot, as it will default to slot 0.
-        .p(0.1)
-        .i(0)
+        .p(1.0)
+        .i(0.1)
         .d(0)
-        .outputRange(-1, 1)
-        // Set PID values for velocity control in slot 1
-        .p(0.0001, ClosedLoopSlot.kSlot1)
-        .i(0, ClosedLoopSlot.kSlot1)
-        .d(0, ClosedLoopSlot.kSlot1)
-        .velocityFF(1.0 / 5767, ClosedLoopSlot.kSlot1)
-        .outputRange(-1, 1, ClosedLoopSlot.kSlot1);
+        .outputRange(-1, 1);
+        // // Set PID values for velocity control in slot 1
+        // .p(0.0001, ClosedLoopSlot.kSlot1)
+        // .i(0, ClosedLoopSlot.kSlot1)
+        // .d(0, ClosedLoopSlot.kSlot1)
+        // .velocityFF(1.0 / 5767, ClosedLoopSlot.kSlot1)
+        // .outputRange(-1, 1, ClosedLoopSlot.kSlot1);
 
     /*
      * Apply the configuration to the SPARK MAX.
@@ -119,50 +119,54 @@ PIDController PIDController = new PIDController(
     m_ArmMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
     // Initialize dashboard values
-    SmartDashboard.setDefaultNumber("Target Position", 0);
-    SmartDashboard.setDefaultNumber("Target Velocity", 0);
-    SmartDashboard.setDefaultBoolean("Control Mode", false);
-    SmartDashboard.setDefaultBoolean("Reset Encoder", false);
+    // SmartDashboard.setDefaultNumber("Target Position", 0);
+    // SmartDashboard.setDefaultNumber("Target Velocity", 0);
+    // SmartDashboard.setDefaultBoolean("Control Mode", false);
+    // SmartDashboard.setDefaultBoolean("Reset Encoder", false);
   }
 
   // ProfiledPIDController testname = new ProfiledPIDController(0.0,
   //         0.0,
   //         0.0, ArmConstants.MOVEMENT_CONSTRAINTS);
-  //  testname.setReference(setPoint, SparkBase.ControlType.kMAXMotionPositionControl);
   public void ArmPeriodic(){
     double m_EncoderValue = m_ArmMotor.getEncoder().getPosition();
     SmartDashboard.putNumber("arm encoder",m_EncoderValue);
     SmartDashboard.putNumber("POV Button Angle",exampleXbox.getPOV());
     SmartDashboard.putNumber("Arm Goal",goal);
-    SmartDashboard.putNumber("Arm Speed",m_ArmMotor.get());
-    SmartDashboard.putNumber("ArmDirection",Direction);
-    double LessRange = goal - 0.05;
-    double MoreRange = goal + 0.05;
-    Boolean InRange;
+    SmartDashboard.putNumber("Arm Output", m_ArmMotor.getAppliedOutput());
+    // SmartDashboard.putNumber("ArmDirection",Direction);
+    // double LessRange = goal - 0.05;
+    // double MoreRange = goal + 0.05;
+    // Boolean InRange;
 
+    // m_ArmMotor.set(ElevatorController.getLeftY());
+
+    m_closedloop.setReference(goal, ControlType.kPosition);
 
     
-     if (LessRange < m_EncoderValue){
-      if (m_EncoderValue < MoreRange){
-        InRange = true;
-      } else {
-        InRange = false;
-      }
-     } else {
-      InRange = false;
-     }
-    // 0 = top, right = 90, bottom = 180, yada yada you should know how angles work
-    if (m_EncoderValue < goal && InRange == false){
-      Direction = 0.1;
-      SmartDashboard.putString("Run or Nah","SHOULD BE RUNNING");
-    } else if (m_EncoderValue > goal && InRange == false ){
-      Direction = -0.75;
-      SmartDashboard.putString("Run or Nah","SHOULD BE RUNNING");
-    } else {
-      Direction = 0.0;
-      SmartDashboard.putString("Run or Nah","SHOULD NOT BE RUNNING");
-    }
-    RunMotor(Direction);
+    //  if (LessRange < m_EncoderValue){
+    //   if (m_EncoderValue < MoreRange){
+    //     InRange = true;
+    //   } else {
+    //     InRange = false;
+    //   }
+    //  } else {
+    //   InRange = false;
+    //  }
+    // // 0 = top, right = 90, bottom = 180, yada yada you should know how angles work
+    // if (m_EncoderValue < goal && InRange == false){
+    //   Direction = 0.1;
+    //   SmartDashboard.putString("Run or Nah","SHOULD BE RUNNING");
+    // } else if (m_EncoderValue > goal && InRange == false ){
+    //   Direction = -0.75;
+    //   SmartDashboard.putString("Run or Nah","SHOULD BE RUNNING");
+    // } else {
+    //   Direction = 0.0;
+    //   SmartDashboard.putString("Run or Nah","SHOULD NOT BE RUNNING");
+    // }
+    // RunMotor(Direction);
+
+    
     
   }
 
@@ -180,32 +184,26 @@ PIDController PIDController = new PIDController(
 
 public void configureBindings(){
         if (exampleXbox.getPOV() == 90){
-          ElevatorController.pov(90).whileTrue(SetPosition(0.4));
+          // ElevatorController.pov(90).whileTrue(SetPosition(0.2));
           goal = 0.2;
-        } else {
-          ;
         }
 
         if (exampleXbox.getPOV() == 180){
-          ElevatorController.pov(-1).whileTrue(SetPosition(0.8));
+          // ElevatorController.pov(-1).whileTrue(SetPosition(1.2));
           goal = 1.2;
-        } else {
-          ;
         }
 
         if (exampleXbox.getPOV() == 0){
-          ElevatorController.pov(-1).whileTrue(SetPosition(0));
+          // ElevatorController.pov(-1).whileTrue(SetPosition(0));
           goal = 0;
-        } else {
-          ;
         }
 }
 
   public Command SetPosition(double setgoal) {
-      return runOnce(() -> m_closedloop.setReference(0.01, ControlType.kPosition));
+      return runOnce(() -> m_closedloop.setReference(setgoal, ControlType.kPosition));
     }
 
-    public void RunMotor(double speed){
-      m_ArmMotor.set(speed);
+    public Command RunMotor(double speed){
+      return runOnce(() -> m_ArmMotor.set(speed));
     }
 }
