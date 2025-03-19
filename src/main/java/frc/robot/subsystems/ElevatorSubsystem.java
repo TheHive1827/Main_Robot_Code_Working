@@ -9,6 +9,7 @@ import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.OIConstants;
 
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.sim.SparkAbsoluteEncoderSim;
 import com.revrobotics.sim.SparkMaxAlternateEncoderSim;
 import com.revrobotics.spark.SparkAbsoluteEncoder;
