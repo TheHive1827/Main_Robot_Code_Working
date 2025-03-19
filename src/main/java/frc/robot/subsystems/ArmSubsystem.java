@@ -25,6 +25,9 @@ import edu.wpi.first.math.util.Units;
 import com.revrobotics.spark.SparkClosedLoopController;
 import edu.wpi.first.math.controller.PIDController;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -36,22 +39,95 @@ import com.ctre.phoenix.*;
 import com.ctre.phoenix6.hardware.CANcoder;
 // import swervelib.encoders.CANCoderSwerve;
 
+public class ArmSubsystem extends SubsystemBase{
+// i love dry paint
 
-public class ArmSubsystem extends SubsystemBase{ // Initializing physical swerve modules
     private final static SparkMax m_ArmMotor = new SparkMax(ArmConstants.armID, MotorType.kBrushless);
   private double m_EncoderValue = m_ArmMotor.getEncoder().getPosition();
   private RelativeEncoder m_ArmEncoder = m_ArmMotor.getEncoder();
-  private PIDController m_controller;
+  // private PIDController m_controller;
+  SparkClosedLoopController m_closedloop = m_ArmMotor.getClosedLoopController();
   static CommandXboxController ElevatorController = new CommandXboxController(1);
    XboxController exampleXbox = new XboxController(1); // 0 is the USB Port to be used as indicated on the Driver Station
+  SparkMaxConfig config = new SparkMaxConfig();
   
+  private SparkMaxConfig motorConfig;
+  private SparkClosedLoopController closedLoopController;
+  private RelativeEncoder encoder;
+
+
+// Set PID gains
+PIDController PIDController = new PIDController(
+            SwerveConstants.kRotor_kP,
+            SwerveConstants.kRotor_kI,
+            SwerveConstants.kRotor_kD
+        );
   double goal;
   int SetPoint;
   double Speed;
   double Direction;
-  ProfiledPIDController testname = new ProfiledPIDController(0.0,
-          0.0,
-          0.0, ArmConstants.MOVEMENT_CONSTRAINTS);
+
+  public void config(){
+    closedLoopController = m_ArmMotor.getClosedLoopController();
+    encoder = m_ArmMotor.getEncoder();
+
+    /*
+     * Create a new SPARK MAX configuration object. This will store the
+     * configuration parameters for the SPARK MAX that we will set below.
+     */
+    motorConfig = new SparkMaxConfig();
+
+    /*
+     * Configure the encoder. For this specific example, we are using the
+     * integrated encoder of the NEO, and we don't need to configure it. If
+     * needed, we can adjust values like the position or velocity conversion
+     * factors.
+     */
+    motorConfig.encoder
+        .positionConversionFactor(1)
+        .velocityConversionFactor(1);
+
+    /*
+     * Configure the closed loop controller. We want to make sure we set the
+     * feedback sensor as the primary encoder.
+     */
+    motorConfig.closedLoop
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        // Set PID values for position control. We don't need to pass a closed loop
+        // slot, as it will default to slot 0.
+        .p(0.1)
+        .i(0)
+        .d(0)
+        .outputRange(-1, 1)
+        // Set PID values for velocity control in slot 1
+        .p(0.0001, ClosedLoopSlot.kSlot1)
+        .i(0, ClosedLoopSlot.kSlot1)
+        .d(0, ClosedLoopSlot.kSlot1)
+        .velocityFF(1.0 / 5767, ClosedLoopSlot.kSlot1)
+        .outputRange(-1, 1, ClosedLoopSlot.kSlot1);
+
+    /*
+     * Apply the configuration to the SPARK MAX.
+     *
+     * kResetSafeParameters is used to get the SPARK MAX to a known state. This
+     * is useful in case the SPARK MAX is replaced.
+     *
+     * kPersistParameters is used to ensure the configuration is not lost when
+     * the SPARK MAX loses power. This is useful for power cycles that may occur
+     * mid-operation.
+     */
+    m_ArmMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+
+    // Initialize dashboard values
+    SmartDashboard.setDefaultNumber("Target Position", 0);
+    SmartDashboard.setDefaultNumber("Target Velocity", 0);
+    SmartDashboard.setDefaultBoolean("Control Mode", false);
+    SmartDashboard.setDefaultBoolean("Reset Encoder", false);
+  }
+
+  // ProfiledPIDController testname = new ProfiledPIDController(0.0,
+  //         0.0,
+  //         0.0, ArmConstants.MOVEMENT_CONSTRAINTS);
   //  testname.setReference(setPoint, SparkBase.ControlType.kMAXMotionPositionControl);
   public void ArmPeriodic(){
     double m_EncoderValue = m_ArmMotor.getEncoder().getPosition();
@@ -60,9 +136,12 @@ public class ArmSubsystem extends SubsystemBase{ // Initializing physical swerve
     SmartDashboard.putNumber("Arm Goal",goal);
     SmartDashboard.putNumber("Arm Speed",m_ArmMotor.get());
     SmartDashboard.putNumber("ArmDirection",Direction);
-    double LessRange = goal - 0.01;
-    double MoreRange = goal + 0.01;
+    double LessRange = goal - 0.05;
+    double MoreRange = goal + 0.05;
     Boolean InRange;
+
+
+    
      if (LessRange < m_EncoderValue){
       if (m_EncoderValue < MoreRange){
         InRange = true;
@@ -74,10 +153,10 @@ public class ArmSubsystem extends SubsystemBase{ // Initializing physical swerve
      }
     // 0 = top, right = 90, bottom = 180, yada yada you should know how angles work
     if (m_EncoderValue < goal && InRange == false){
-      Direction = 0.3;
+      Direction = 0.1;
       SmartDashboard.putString("Run or Nah","SHOULD BE RUNNING");
     } else if (m_EncoderValue > goal && InRange == false ){
-      Direction = -0.3;
+      Direction = -0.75;
       SmartDashboard.putString("Run or Nah","SHOULD BE RUNNING");
     } else {
       Direction = 0.0;
@@ -102,14 +181,14 @@ public class ArmSubsystem extends SubsystemBase{ // Initializing physical swerve
 public void configureBindings(){
         if (exampleXbox.getPOV() == 90){
           ElevatorController.pov(90).whileTrue(SetPosition(0.4));
-          goal = 0.4;
+          goal = 0.2;
         } else {
           ;
         }
 
         if (exampleXbox.getPOV() == 180){
           ElevatorController.pov(-1).whileTrue(SetPosition(0.8));
-          goal = 0.8;
+          goal = 1.2;
         } else {
           ;
         }
@@ -123,7 +202,7 @@ public void configureBindings(){
 }
 
   public Command SetPosition(double setgoal) {
-      return runOnce(() -> m_ArmMotor.set(testname.calculate(m_ArmEncoder.getPosition(), setgoal)));
+      return runOnce(() -> m_closedloop.setReference(0.01, ControlType.kPosition));
     }
 
     public void RunMotor(double speed){

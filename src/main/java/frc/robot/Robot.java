@@ -16,11 +16,19 @@ import frc.robot.subsystems.ElevatorSubsystem;
  * the package after creating this project, you must also update the build.gradle file in the
  * project.
  */
+
+   /*
+    * Initialize the SPARK MAX and get its encoder and closed loop controller
+    * objects for later use.
+    */
+
 public class Robot extends TimedRobot {
     private Command m_autonomousCommand;
     private final ElevatorSubsystem m_Elevator = new ElevatorSubsystem();
     private final ArmSubsystem m_Arm = new ArmSubsystem();
     private RobotContainer m_robotContainer;
+    
+
 
     /**
      * This function is run when the robot is first started up and should be used for any
@@ -89,6 +97,7 @@ public class Robot extends TimedRobot {
     public void teleopPeriodic() {
         m_Elevator.configureBindings();
         m_Elevator.periodic();
+        m_Elevator.ElevatorInit();
         m_Arm.ArmPeriodic();
         m_Arm.configureBindings();
     }

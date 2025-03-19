@@ -35,55 +35,64 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 
 public class ElevatorSubsystem extends SubsystemBase {
-    static CommandXboxController ElevatorController = new CommandXboxController(1);
+  static CommandXboxController ElevatorController = new CommandXboxController(1);
   XboxController exampleXbox = new XboxController(1); // 0 is the USB Port to be used as indicated on the Driver Station
-  public final static SparkMax elevatorMotorLeader = new SparkMax(ElevatorConstants.ElevatorLeader, MotorType.kBrushless);
-  SparkClosedLoopController elevatorPID = elevatorMotorLeader.getClosedLoopController();
-  public static SparkMaxConfig config = new SparkMaxConfig();
-  private final static AbsoluteEncoder motorLeaderEncoder = elevatorMotorLeader.getAbsoluteEncoder();
-  private final static int setPoint = 0;
-  double ElevatorEncoderValue = motorLeaderEncoder.getPosition();
+  private final static SparkMax elevatorMotor = new SparkMax(ElevatorConstants.ElevatorLeader, MotorType.kBrushless);
+  private final static RelativeEncoder elevatorMotorEncoder = elevatorMotor.getEncoder();
+  public static SparkClosedLoopController m_elevatorPID = elevatorMotor.getClosedLoopController();
+  double ElevatorEncoderValue = elevatorMotorEncoder.getPosition();
   boolean ButtonA = exampleXbox.getAButtonPressed();
   boolean ButtonY = exampleXbox.getYButtonPressed();
   boolean ButtonX = exampleXbox.getXButtonPressed();
   boolean ButtonB = exampleXbox.getBButtonPressed();
 
-  public ElevatorSubsystem(){
+  public void ElevatorInit(){
+    final SparkMaxConfig config = new SparkMaxConfig();
     config.closedLoop
-    .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-    .p(0.01)
+    .p(0.000001)
     .i(0.0)
     .d(0.0)
-    .outputRange(-1, 1);
-    elevatorPID.setReference(setPoint, ControlType.kPosition);
-
-    elevatorMotorLeader.configure(config, null, null);
+    .velocityFF(1/473)
+    .outputRange(ElevatorConstants.ElevatorMin, ElevatorConstants.ElevatorMax);
+    elevatorMotor.configure(config, null, null);
+    elevatorMotorEncoder.setPosition(0);
   }
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
     ButtonA = exampleXbox.getAButtonPressed();
-        ButtonY = exampleXbox.getYButtonPressed();
-        SmartDashboard.putNumber("elevator encoder ig",ElevatorEncoderValue);
-        SmartDashboard.putBoolean("A", ButtonA);
-        SmartDashboard.putBoolean("Y", ButtonY);}
+    ButtonY = exampleXbox.getYButtonPressed();
+    SmartDashboard.putNumber("Elevator encoder", elevatorMotorEncoder.getPosition());
+    SmartDashboard.putBoolean("A", ButtonA);
+    SmartDashboard.putBoolean("Y", ButtonY);}
 
   public Command ElevatorCommand(double speed) {
-    return runOnce(() -> elevatorMotorLeader.set(speed));
+    return runOnce(() -> elevatorMotor.set(speed));
     }
+
+  public Command ElevatorDown(double speed) {
+    return runOnce(() -> elevatorMotor.set(-speed));
+  }
+
+  public Command ElevatorGoToPoint(double setPoint){
+    return runOnce(() -> m_elevatorPID.setReference(setPoint, ControlType.kVelocity));
+  }
+
 
     public void configureBindings() {
         ButtonA = exampleXbox.getAButtonPressed();
         ButtonY = exampleXbox.getYButtonPressed();
-          if (ButtonA == false && ButtonY == false){
+        ButtonX = exampleXbox.getXButtonPressed();
+          if (ButtonA == false && ButtonY == false && ButtonX == false){
             ElevatorController.y().whileFalse(ElevatorCommand(0));
             ElevatorController.a().whileFalse(ElevatorCommand(0));
+            ElevatorController.x().whileFalse(ElevatorGoToPoint(0));
             // when both of them are NOT being pressed, when either of them are NOT ebing pressed it stops the motors.
           }
            else {
             ElevatorController.a().whileTrue(ElevatorCommand(-0.1));
             ElevatorController.y().whileTrue(ElevatorCommand(0.1));
+            ElevatorController.x().whileFalse(ElevatorGoToPoint(ElevatorConstants.ElevatorMax));
             // 
           } 
         
