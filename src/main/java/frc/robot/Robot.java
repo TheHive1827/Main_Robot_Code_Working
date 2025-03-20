@@ -8,7 +8,9 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.ArmSubsystem;
-import frc.robot.subsystems.ElevatorSubsystem;
+// import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.ElevatorSubsystemPos;
+import frc.robot.subsystems.IntakeSubsystem;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -24,8 +26,9 @@ import frc.robot.subsystems.ElevatorSubsystem;
 
 public class Robot extends TimedRobot {
     private Command m_autonomousCommand;
-    private final ElevatorSubsystem m_Elevator = new ElevatorSubsystem();
+    private final ElevatorSubsystemPos m_Elevator = new ElevatorSubsystemPos();
     private final ArmSubsystem m_Arm = new ArmSubsystem();
+    private final IntakeSubsystem m_Intake = new IntakeSubsystem();
     private RobotContainer m_robotContainer;
     
 
@@ -38,7 +41,8 @@ public class Robot extends TimedRobot {
     public void robotInit() {
         m_Arm.config();
         m_Arm.resetEncoders();
-        m_Elevator.ElevatorInit();
+        m_Arm.configureBindings();
+        // m_Elevator.ElevatorInit();
         // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
         // autonomous chooser on the dashboard.
         m_robotContainer = new RobotContainer();
@@ -53,6 +57,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void robotPeriodic() {
+        m_Arm.ArmPeriodic();
         // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
         // commands, running already-scheduled commands, removing finished or interrupted commands,
         // and running subsystem periodic() methods.  This must be called from the robot's periodic
@@ -80,6 +85,8 @@ public class Robot extends TimedRobot {
     /** This function is called periodically during autonomous. */
     @Override
     public void autonomousPeriodic() {
+        double driveSpeed = 0.1;
+        m_robotContainer.driveForwards(driveSpeed);
     }
 
     @Override
@@ -91,16 +98,15 @@ public class Robot extends TimedRobot {
         if (m_autonomousCommand != null) {
             m_autonomousCommand.cancel();
         }
-        ElevatorSubsystem.elevatorMotorLeader.configure(ElevatorSubsystem.config, null, null);
+        // ElevatorSubsystem.elevatorMotor.configure(ElevatorSubsystem.config, null, null);
     }
 
-    /** This function is called periodically during operator control. */
+    /** This function is called periodically during operator controwl. */
     @Override
     public void teleopPeriodic() {
-        m_Elevator.configureBindings();
         m_Elevator.periodic();
-        m_Arm.configureBindings();
-        m_Arm.ArmPeriodic();
+        m_Elevator.configureBindings();
+        m_Intake.configureBindings();
     }
 
     @Override

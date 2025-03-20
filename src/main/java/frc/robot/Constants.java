@@ -79,7 +79,7 @@ public final class Constants {
         // 輪徑
         public static final double kWheelDiameterMeters = Units.inchesToMeters(4.0); // wheel diameter
         
-        // Throttle gear ratio
+        // Throttle                                                                           ratio
         // (number of turns it takes the motor to rotate the rotor one revolution)
         public static final double kThrottleGearRatio = 21.4285714286; 
 
@@ -123,11 +123,12 @@ public final class Constants {
 
       public static final class ElevatorConstants{
         public static final int ElevatorLeader = 10;
-        public static final double ElevatorMin = 5.738089;
-        public static final double ElevatorMax = 35.880615;
-        public static final double ElevatorScoreCoral = 16.095222;
-        public static final double ElevatorGetCoralUp = 22.809401;
-        public static final double ElevatorGetCoralDown = 10.428621;
+        public static final double ElevatorMin = 0; // min of the elevator
+        public static final double ElevatorMax = 25.880615; // max of the elevator
+        public static final double ElevatorScoreCoral = 16.095222; // when we're scoring it
+        public static final double ElevatorGetCoralUp = 3.238095; // when the arms up
+        public static final double ElevatorGetCoralDown = 27.975985; // when the arms down
+        public static final double ElevatorMiddle = 10;
 
       }
 
@@ -135,6 +136,12 @@ public final class Constants {
         public static final int armID = 12;
         public static final double armMAXWhen = 0.619048;
         public static final double armMinimum = 0.619048;
+
+        public static final double armUp = 0.0;
+        public static final double armMid = 0.2;
+        public static final double armDown = 1.2;
+        public static final double armBottomGetCoral = 1.2;
+
         public static final double MAX_DRIVING_VELOCITY_METERS_PER_SECOND = 5;
         public static final double MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED = 8;
         public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = 20;
@@ -149,6 +156,6 @@ public final class Constants {
       }
 
       public static final class IntakeConstants{
-        public static final int intakeID = 11;
+        public static final int intakeID = 9;
       }
 }

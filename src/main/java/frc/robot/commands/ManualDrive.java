@@ -25,4 +25,13 @@ public class ManualDrive extends Command {
                 -MathUtil.applyDeadband(mController.getLeftX(), 0.05),
                 -MathUtil.applyDeadband(mController.getRightX(), 0.05),false);
     }
+
+    public void drive(double speed) {
+        // Drives with XSpeed, YSpeed, zSpeed
+        // True/false for field-oriented driving
+        mSwerve.drive(speed,
+                0,
+                0,
+                false);
+    }
 }

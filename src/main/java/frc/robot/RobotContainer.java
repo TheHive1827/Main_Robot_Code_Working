@@ -8,7 +8,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 import frc.robot.commands.ManualDrive;
 import frc.robot.subsystems.ArmSubsystem;
-import frc.robot.subsystems.ElevatorSubsystem;
+// import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.ElevatorSubsystemPos;
 import frc.robot.subsystems.Swerve;
 
 
@@ -32,4 +33,8 @@ public class RobotContainer {
     }
 
     private void configureButtonBindings() {}
+
+    public void driveForwards(double speed) {
+        mManualDriveCommand.drive(speed);
+    }
 }
