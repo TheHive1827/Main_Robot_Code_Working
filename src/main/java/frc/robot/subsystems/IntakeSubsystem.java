@@ -32,33 +32,21 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
-
 public class IntakeSubsystem extends SubsystemBase {
   static CommandXboxController ElevatorController = new CommandXboxController(1);
-  XboxController exampleXbox = new XboxController(1); // 0 is the USB Port to be used as indicated on the Driver Station
   private final static SparkMax intakeMotor = new SparkMax(IntakeConstants.intakeID, MotorType.kBrushless);
-  boolean LeftBump = exampleXbox.getLeftBumperButtonPressed();
-  boolean RightBump = exampleXbox.getRightBumperButtonPressed();
-  boolean ButtonX = exampleXbox.getXButtonPressed();
-  
 
   public void configureBindings() {
-    LeftBump = exampleXbox.getLeftBumperButtonPressed();
-    RightBump = exampleXbox.getRightBumperButtonPressed();
-      if (LeftBump == false && RightBump == false){
-        ElevatorController.leftBumper().whileFalse(IntakeCommand(0));
-        ElevatorController.rightBumper().whileFalse(IntakeCommand(0));
-        // when both of them are NOT being pressed, when either of them are NOT ebing pressed it stops the motors.
-      }
-       else {
-        ElevatorController.leftBumper().whileTrue(IntakeCommand(1));
-        ElevatorController.rightBumper().whileTrue(IntakeCommand(-1));
-    }
-}
+    // When either bumper changes to false, stop the motor.
+    ElevatorController.leftBumper().onFalse(IntakeCommand(0));
+    ElevatorController.rightBumper().onFalse(IntakeCommand(0));
+    // While either bumper is true, run the motor.
+    ElevatorController.leftBumper().onTrue(IntakeCommand(1));
+    ElevatorController.rightBumper().onTrue(IntakeCommand(-1));
+  }
 
+  public Command IntakeCommand(double speed) {
+    return runOnce(() -> intakeMotor.set(speed));
+  }
 
-    public Command IntakeCommand(double speed){
-        return runOnce(() -> intakeMotor.set(speed));
-    }
-    
 }

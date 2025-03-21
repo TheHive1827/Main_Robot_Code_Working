@@ -39,8 +39,8 @@ import com.ctre.phoenix.*;
 import com.ctre.phoenix6.hardware.CANcoder;
 // import swervelib.encoders.CANCoderSwerve;
 
-public class ArmSubsystem extends SubsystemBase{
-// i love dry paint2b .
+public class ArmSubsystem extends SubsystemBase {
+  // i love dry paint2b .
 
   private final static SparkMax m_ArmMotor = new SparkMax(ArmConstants.armID, MotorType.kBrushless);
   private double m_EncoderValue = m_ArmMotor.getEncoder().getPosition();
@@ -48,26 +48,18 @@ public class ArmSubsystem extends SubsystemBase{
   // private PIDController m_controller;
   SparkClosedLoopController m_closedloop = m_ArmMotor.getClosedLoopController();
   static CommandXboxController ElevatorController = new CommandXboxController(1);
-   XboxController exampleXbox = new XboxController(1); // 0 is the USB Port to be used as indicated on the Driver Station
   SparkMaxConfig config = new SparkMaxConfig();
-  
+
   private SparkMaxConfig motorConfig;
   private SparkClosedLoopController closedLoopController;
   private RelativeEncoder encoder;
 
-
-// Set PID gains
-// PIDController PIDController = new PIDController(
-//             SwerveConstants.kRotor_kP,
-//             SwerveConstants.kRotor_kI,
-//             SwerveConstants.kRotor_kD
-//         );
   double goal;
   int SetPoint;
   double Speed;
   double Direction;
 
-  public void config(){
+  public void config() {
     m_closedloop = m_ArmMotor.getClosedLoopController();
     encoder = m_ArmMotor.getEncoder();
 
@@ -80,7 +72,7 @@ public class ArmSubsystem extends SubsystemBase{
         .p(2.65)
         // speed
         .i(0.0)
-        // integral 
+        // integral
         .d(0.0)
         // kinda like friction
         .outputRange(-1.0, 0.3);
@@ -88,51 +80,34 @@ public class ArmSubsystem extends SubsystemBase{
     m_ArmMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
-  // ProfiledPIDController testname = new ProfiledPIDController(0.0,
-  //         0.0,
-  //         0.0, ArmConstants.MOVEMENT_CONSTRAINTS);
-
-  public void ArmPeriodic(){
+  public void ArmPeriodic() {
     double m_EncoderValue = m_ArmMotor.getEncoder().getPosition();
     SmartDashboard.putNumber("arm encoder", m_EncoderValue);
-    SmartDashboard.putNumber("POV Button Angle", exampleXbox.getPOV());
     SmartDashboard.putNumber("Arm Goal", goal);
-    SmartDashboard.putNumber("Arm Output",  m_ArmMotor.getAppliedOutput());
+    SmartDashboard.putNumber("Arm Output", m_ArmMotor.getAppliedOutput());
     SmartDashboard.putNumber("ArmDirection", Direction);
   }
 
-  public void resetEncoders(){
+  public void resetEncoders() {
     m_ArmEncoder.setPosition(0);
     goal = 0;
   }
 
-  /**
-   * Constructs a MAXSwerveModule and configures the driving and turning motor,
-   * encoder, and PID controller. This configuration is specific to the REV
-   * MAXSwerve Module built with NEOs, SPARKS MAX, and a Through Bore
-   * Encoder.
-   */
+  public void RunMotor(double speed) {
+    m_ArmMotor.set(speed);
+  }
 
-public void configureBindings(){
-        if (exampleXbox.getPOV() == 90){
-          goal = ArmConstants.armMid;
-        }
+  public Command setPosition(double pos){
+    return runOnce(() -> m_closedloop.setReference(pos, ControlType.kPosition));
+  }
 
-        if (exampleXbox.getPOV() == 180){
-          goal = ArmConstants.armDown;
+  public double getPosition(){
+    return m_ArmMotor.getEncoder().getPosition();
+  }
 
-        }
-
-        if (exampleXbox.getPOV() == 0){
-          goal = ArmConstants.armUp;
-        }
-}
-
-  public Command SetPosition(double setgoal) {
-      return runOnce(() -> m_closedloop.setReference(setgoal, ControlType.kPosition));
-    }
-
-    public void RunMotor(double speed){
-      m_ArmMotor.set(speed);
-    }
+  public void configureArmBindings() {
+    ElevatorController.povDown().onTrue(setPosition(ArmConstants.armDown));
+    ElevatorController.povRight().onTrue(setPosition(ArmConstants.armMid));
+    ElevatorController.povUp().onTrue(setPosition(ArmConstants.armUp));
+  }
 }

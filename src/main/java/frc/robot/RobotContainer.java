@@ -16,15 +16,12 @@ import frc.robot.subsystems.Swerve;
 public class RobotContainer {
     // The robot's subsystems and commands are defined here...
     private final XboxController mController = new XboxController(Constants.kControllerPort);
-    private final ArmSubsystem m_Arm = new ArmSubsystem();
     private final Swerve mSwerve = new Swerve();
 
     // Create new instance of ManualDrive, passing Swerve and Controller as parameters
-    // 創造一個新的 ManualDrive instance, 給他 Swerve 跟 Controller 當 parameters
     private final ManualDrive mManualDriveCommand = new ManualDrive(mSwerve, mController);
 
     // Extract trajectory from PathPlanner
-    // 從 PathPlanner 獲取 trajectory
     public RobotContainer() {
         // Configure the button bindings
         configureButtonBindings();
@@ -35,6 +32,6 @@ public class RobotContainer {
     private void configureButtonBindings() {}
 
     public void driveForwards(double speed) {
-        mManualDriveCommand.drive(speed);
+        mManualDriveCommand.drive(-1*speed);
     }
 }

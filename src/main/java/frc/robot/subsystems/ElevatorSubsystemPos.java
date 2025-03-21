@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -27,6 +28,9 @@ import com.revrobotics.spark.SparkMaxAlternateEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
+
+import java.util.function.BooleanSupplier;
+
 import com.ctre.phoenix.motorcontrol.IFollower;
 import com.revrobotics.*;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -38,11 +42,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
-
 public class ElevatorSubsystemPos extends SubsystemBase {
   private final ArmSubsystem m_Arm = new ArmSubsystem();
   static CommandXboxController ElevatorController = new CommandXboxController(1);
-  XboxController exampleXbox = new XboxController(1); // 0 is the USB Port to be used as indicated on the Driver Station
   public final static SparkMax elevatorMotor = new SparkMax(ElevatorConstants.ElevatorLeader, MotorType.kBrushless);
   private final static RelativeEncoder elevatorMotorEncoder = elevatorMotor.getEncoder();
   public static final SparkMaxConfig config = new SparkMaxConfig();
@@ -50,55 +52,68 @@ public class ElevatorSubsystemPos extends SubsystemBase {
   public static SparkClosedLoopController m_elevatorPID = elevatorMotor.getClosedLoopController();
   RelativeEncoder encoder;
   public static final SparkMaxConfig motorConfig = new SparkMaxConfig();
+  private double m_goal = 0.0;
 
-  double ElevatorEncoderValue = elevatorMotorEncoder.getPosition();
-  boolean ButtonA = exampleXbox.getAButtonPressed();
-  boolean ButtonY = exampleXbox.getYButtonPressed();
-  boolean ButtonX = exampleXbox.getXButtonPressed();
-  boolean ButtonB = exampleXbox.getBButtonPressed();
-
-   public void config(){
-      m_elevatorPID = elevatorMotor.getClosedLoopController();
-    encoder = elevatorMotor.getEncoder();
+  public void config() {
+    m_elevatorPID = elevatorMotor.getClosedLoopController();
 
     motorConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         // Set PID values for position control. We don't need to pass a closed loop
         // slot, as it will default to slot 0.
-        .p(0.01)
+        .p(1.0)
         // speed
         .i(0.0)
-        // integral 
+        // integral
         .d(0.0)
         // kinda like friction
-        .outputRange(-1.0, 1);
+        .outputRange(-0.1, 0.1);
 
     elevatorMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
   @Override
   public void periodic() {
-    ButtonA = exampleXbox.getAButtonPressed();
-    ButtonY = exampleXbox.getYButtonPressed();
-    
     SmartDashboard.putNumber("Elevator encoder", elevatorMotorEncoder.getPosition());
-    SmartDashboard.putBoolean("A", ButtonA);
-    SmartDashboard.putBoolean("Y", ButtonY);
+    SmartDashboard.putNumber("Elevator Output", elevatorMotor.getAppliedOutput());
+  }
+
+  public void SetElevatorGoal(double position) {
+    m_elevatorPID.setReference(position, ControlType.kPosition);
+    m_goal = position;
   }
 
   public Command ElevatorCommand(double position) {
-    return runOnce(() -> m_elevatorPID.setReference(position, ControlType.kPosition));
-    }
-  public void elevatorGetCoral() {
-    ElevatorController.b().whileTrue(
-      run(() -> ElevatorCommand(ElevatorConstants.ElevatorGetCoralUp))
-    .andThen(run(() -> Commands.parallel(ElevatorCommand(ElevatorConstants.ElevatorGetCoralDown),m_Arm.SetPosition(ArmConstants.armBottomGetCoral))))
-    .andThen(run(() -> m_Arm.SetPosition(ArmConstants.armMid)))
-    .andThen(run(() -> ElevatorCommand(ElevatorConstants.ElevatorGetCoralUp))));}
+    return runOnce(() -> SetElevatorGoal(position));
+  }
 
-    public void configureBindings() {
-      ElevatorController.a().whileTrue(ElevatorCommand(ElevatorConstants.ElevatorMin));
-      ElevatorController.y().whileTrue(ElevatorCommand(ElevatorConstants.ElevatorMax));
-      ElevatorController.x().whileTrue(ElevatorCommand(ElevatorConstants.ElevatorMiddle));
-}
+  public boolean ElevatorCloseToGoal() {
+    double tolerance = 1.0;
+    return Math.abs(elevatorMotorEncoder.getPosition() - m_goal) < tolerance;
+  }
+
+  public Command GetCoral() {
+    return run(() -> ElevatorCommand(ElevatorConstants.ElevatorGetCoralUp))
+        .andThen(Commands.waitSeconds(2.0))
+        // .andThen(Commands.waitUntil(this::ElevatorCloseToGoal))
+        .andThen(m_Arm.setPosition(ArmConstants.armBottomGetCoral))
+        .andThen(Commands.waitSeconds(1.0))
+        .andThen(ElevatorCommand(ElevatorConstants.ElevatorGetCoralDown))
+        .andThen(Commands.waitSeconds(2.0))
+        .andThen(ElevatorCommand(ElevatorConstants.ElevatorGetCoralUp))
+        .andThen(Commands.waitSeconds(2.0))
+        .andThen(m_Arm.setPosition(ArmConstants.armMid))
+        .andThen(Commands.waitSeconds(1.0));
+  }
+
+  public Command loadingPosition(){
+    return run(() -> Commands.parallel(ElevatorCommand(ElevatorConstants.ElevatorMin), m_Arm.setPosition(ArmConstants.armUp)));
+  }
+
+  public void configureElevatorBindings() {
+    ElevatorController.a().onTrue(ElevatorCommand(ElevatorConstants.ElevatorMin));
+    ElevatorController.y().onTrue(ElevatorCommand(ElevatorConstants.ElevatorMax));
+    ElevatorController.x().onTrue(loadingPosition());
+    ElevatorController.b().onTrue(GetCoral());
+  }
 }

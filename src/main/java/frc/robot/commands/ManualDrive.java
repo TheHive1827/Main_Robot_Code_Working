@@ -8,7 +8,7 @@ import frc.robot.subsystems.Swerve;
 public class ManualDrive extends Command {
     private final Swerve mSwerve;
     private final XboxController mController;
-    
+
     public ManualDrive(Swerve drive, XboxController controller) {
         mSwerve = drive;
         mController = controller;
@@ -23,7 +23,7 @@ public class ManualDrive extends Command {
         // True/false for field-oriented driving
         mSwerve.drive(-MathUtil.applyDeadband(mController.getLeftY(), 0.05),
                 -MathUtil.applyDeadband(mController.getLeftX(), 0.05),
-                -MathUtil.applyDeadband(mController.getRightX(), 0.05),false);
+                -MathUtil.applyDeadband(mController.getRightX(), 0.05), false);
     }
 
     public void drive(double speed) {

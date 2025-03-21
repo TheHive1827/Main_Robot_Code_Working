@@ -74,24 +74,4 @@
 //   //   .andThen(run(() -> Commands.parallel(ElevatorGoToPoint(ElevatorConstants.ElevatorGetCoralDown),m_Arm.SetPosition(ArmConstants.armBottomGetCoral))))
 //   //   .andThen(run(() -> m_Arm.SetPosition(ArmConstants.armMid)))
 //   //   .andThen(run(() -> ElevatorGoToPoint(ElevatorConstants.ElevatorGetCoralUp))));}
-
-//     public void configureBindings() {
-//         ButtonA = exampleXbox.getAButtonPressed();
-//         ButtonY = exampleXbox.getYButtonPressed();
-//         ButtonX = exampleXbox.getXButtonPressed();
-//           if (ButtonA == false && ButtonY == false && ButtonX == false){
-//             ElevatorController.y().whileFalse(ElevatorCommand(0));
-//             ElevatorController.a().whileFalse(ElevatorCommand(0));
-//             // ElevatorController.x().whileFalse(ElevatorGoToPoint(0));
-//             // when both of them are NOT being pressed, when either of them are NOT ebing pressed it stops the motors.
-//           }
-//            else {
-//             ElevatorController.a().whileTrue(ElevatorCommand(-0.1));
-//             ElevatorController.y().whileTrue(ElevatorCommand(0.1));
-//             // ElevatorController.x().whileTrue(ElevatorGoToPoint(ElevatorConstants.ElevatorMax));
-            
-//             // 
-//           } 
-        
-//       }
 // }
