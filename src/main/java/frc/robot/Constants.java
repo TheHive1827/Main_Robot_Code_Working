@@ -123,15 +123,15 @@ public final class Constants {
 
       public static final class ElevatorConstants{
         public static final int ElevatorLeader = 10;
-        public static final double ElevatorMin = 0; // min of the elevator
-        public static final double ElevatorMax = 25.880615; // max of the elevator
-        public static final double ElevatorScoreCoral = 16.095222; // when we're scoring it
-        public static final double ElevatorGetCoralUp = 3.238095; // when the arms up
-        public static final double ElevatorGetCoralDown = 27.975985; // when the arms down
-        public static final double ElevatorMiddle = 10;
+        public static final double ElevatorMin = 3.571428; // min of the elevator
+        public static final double ElevatorMax = 21.761799; // max of the elevator
+        
+        public static final double ElevatorScoreCoral = 24.142712; // when we're scoring it
+        public static final double ElevatorGetCoralUp = 35.856812; // when the arms up
+        public static final double ElevatorGetCoralDown = 19.999924; // when the arms down
+
 
       }
-
       public static final class ArmConstants{
         public static final int armID = 12;
         public static final double armMAXWhen = 0.619048;
@@ -139,8 +139,8 @@ public final class Constants {
 
         public static final double armUp = 0.0;
         public static final double armMid = 0.2;
-        public static final double armDown = 1.2;
-        public static final double armBottomGetCoral = 1.2;
+        public static final double armDown = 1.3;
+        public static final double armBottomGetCoral = 1.3;
 
         public static final double MAX_DRIVING_VELOCITY_METERS_PER_SECOND = 5;
         public static final double MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED = 8;

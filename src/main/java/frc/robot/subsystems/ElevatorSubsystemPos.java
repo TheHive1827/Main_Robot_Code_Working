@@ -67,7 +67,7 @@ public class ElevatorSubsystemPos extends SubsystemBase {
         // integral
         .d(0.0)
         // kinda like friction
-        .outputRange(-0.1, 0.1);
+        .outputRange(-0.5, 0.5);
 
     elevatorMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
   }
@@ -84,7 +84,7 @@ public class ElevatorSubsystemPos extends SubsystemBase {
   }
 
   public Command ElevatorCommand(double position) {
-    return runOnce(() -> SetElevatorGoal(position));
+   return runOnce(() -> SetElevatorGoal(position));
   }
 
   public boolean ElevatorCloseToGoal() {
@@ -93,17 +93,21 @@ public class ElevatorSubsystemPos extends SubsystemBase {
   }
 
   public Command GetCoral() {
-    return run(() -> ElevatorCommand(ElevatorConstants.ElevatorGetCoralUp))
-        .andThen(Commands.waitSeconds(2.0))
-        // .andThen(Commands.waitUntil(this::ElevatorCloseToGoal))
-        .andThen(m_Arm.setPosition(ArmConstants.armBottomGetCoral))
-        .andThen(Commands.waitSeconds(1.0))
-        .andThen(ElevatorCommand(ElevatorConstants.ElevatorGetCoralDown))
-        .andThen(Commands.waitSeconds(2.0))
-        .andThen(ElevatorCommand(ElevatorConstants.ElevatorGetCoralUp))
-        .andThen(Commands.waitSeconds(2.0))
-        .andThen(m_Arm.setPosition(ArmConstants.armMid))
-        .andThen(Commands.waitSeconds(1.0));
+    return runOnce(() -> Commands.waitSeconds(0.01))
+    .andThen(ElevatorCommand(ElevatorConstants.ElevatorGetCoralUp))
+    .andThen(Commands.waitUntil(this::ElevatorCloseToGoal))
+    .andThen(m_Arm.setPosition(ArmConstants.armMid))
+    .andThen(Commands.waitUntil(this::ElevatorCloseToGoal))
+        // .andThen(Commands.waitSeconds(2.0))
+    // .andThen(Commands.waitUntil(this::ElevatorCloseToGoal));
+    .andThen(m_Arm.setPosition(ArmConstants.armBottomGetCoral))
+    .andThen(Commands.waitUntil(this::ElevatorCloseToGoal))
+    .andThen(ElevatorCommand(ElevatorConstants.ElevatorGetCoralDown))
+    .andThen(Commands.waitUntil(this::ElevatorCloseToGoal))
+    .andThen(ElevatorCommand(ElevatorConstants.ElevatorGetCoralUp))
+    .andThen(Commands.waitUntil(this::ElevatorCloseToGoal))
+    .andThen(m_Arm.setPosition(ArmConstants.armMid))
+    .andThen(Commands.waitUntil(this::ElevatorCloseToGoal));
   }
 
   public Command loadingPosition(){
@@ -112,8 +116,9 @@ public class ElevatorSubsystemPos extends SubsystemBase {
 
   public void configureElevatorBindings() {
     ElevatorController.a().onTrue(ElevatorCommand(ElevatorConstants.ElevatorMin));
-    ElevatorController.y().onTrue(ElevatorCommand(ElevatorConstants.ElevatorMax));
-    ElevatorController.x().onTrue(loadingPosition());
-    ElevatorController.b().onTrue(GetCoral());
+    ElevatorController.y().onTrue(ElevatorCommand(ElevatorConstants.ElevatorGetCoralUp));
+    ElevatorController.x().onTrue(ElevatorCommand(ElevatorConstants.ElevatorScoreCoral));
+    ElevatorController.leftBumper().onTrue(GetCoral()); 
+    ElevatorController.b().onTrue(ElevatorCommand(ElevatorConstants.ElevatorGetCoralDown));
   }
 }

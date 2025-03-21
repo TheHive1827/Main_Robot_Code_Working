@@ -10,14 +10,15 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.ArmSubsystem;
 // import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ElevatorSubsystemPos;
-import frc.robot.subsystems.IntakeSubsystem;
+// import frc.robot.subsystems.IntakeSubsystem;
+import edu.wpi.first.cameraserver.CameraServer;
 
 
 public class Robot extends TimedRobot {
     private Command m_autonomousCommand;
     private final ElevatorSubsystemPos m_Elevator = new ElevatorSubsystemPos();
     private final ArmSubsystem m_Arm = new ArmSubsystem();
-    private final IntakeSubsystem m_Intake = new IntakeSubsystem();
+    // private final IntakeSubsystem m_Intake = new IntakeSubsystem();
     private RobotContainer m_robotContainer;
     
 
@@ -30,8 +31,9 @@ public class Robot extends TimedRobot {
     public void robotInit() {
         m_Arm.config();
         m_Arm.resetEncoders();
-
+        m_Elevator.config();
         m_robotContainer = new RobotContainer();
+        CameraServer.startAutomaticCapture();
     }
 
 
@@ -78,7 +80,8 @@ public class Robot extends TimedRobot {
             m_autonomousCommand.cancel();
         }
         m_Elevator.configureElevatorBindings();
-        m_Intake.configureBindings();
+        // m_Intake.configureBindings();
+        m_Arm.configureArmBindings();
         // ElevatorSubsystem.elevatorMotor.configure(ElevatorSubsystem.config, null, null);
     }
 

@@ -85,7 +85,7 @@ public class Swerve extends SubsystemBase {
                 new ChassisSpeeds(xSpeed, ySpeed, zSpeed)
             );
         }
-        SmartDashboard.putString("Relative chassis speeds: ", new ChassisSpeeds(xSpeed, ySpeed, zSpeed).toString());
+
         // SmartDashboard.putString("Field chassis speeds: ", ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, zSpeed, mImu.getRotation2d()).toString());
         setModuleStates(states);
     }
@@ -119,7 +119,7 @@ public class Swerve extends SubsystemBase {
     }
 
     /**
-     * Sets swerve module states
+     * Sets swerve module states+
      * 
      * @param desiredStates array of desired states, order: [leftFront, leftRear, rightFront, rightRear]
      */

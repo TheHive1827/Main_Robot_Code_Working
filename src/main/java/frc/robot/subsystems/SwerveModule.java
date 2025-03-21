@@ -144,20 +144,12 @@ public class SwerveModule {
      * @param state module state 
      */
     public void setState(SwerveModuleState state) {
-        SmartDashboard.putNumber(m_name + " state angle: ", state.angle.getDegrees());
         SwerveModuleState optimizedState = state;
         optimizedState.optimize(getState().angle);
-        
-        SmartDashboard.putNumber(m_name + " current angle: ", getState().angle.getDegrees());
-        SmartDashboard.putNumber(m_name + " optimized angle: ", optimizedState.angle.getDegrees());
+    
         double rotorOutput = mRotorPID.calculate(getState().angle.getDegrees(), optimizedState.angle.getDegrees());
-        SmartDashboard.putNumber(m_name + " Rotor output: ", rotorOutput);
 
         mRotor.set(rotorOutput);
         mThrottle.set(optimizedState.speedMetersPerSecond);
-
-        // System.out.println("Desired State: " + optimizedState);
-        SmartDashboard.putString(m_name + " desired state: ", optimizedState.toString());
-        SmartDashboard.putString(m_name + " current state: ", getState().toString());
     }
 }
