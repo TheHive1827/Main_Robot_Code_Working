@@ -69,13 +69,14 @@ public class ArmSubsystem extends SubsystemBase {
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         // Set PID values for position control. We don't need to pass a closed loop
         // slot, as it will default to slot 0.
-        .p(2.65)
+        .p(ArmConstants.ArmP) // originally 2.65
         // speed
-        .i(0.0)
+        .i(ArmConstants.ArmI) // originally 0.0
         // integral
-        .d(0.0)
+        .d(ArmConstants.ArmD) // originally 0.0
         // kinda like friction
         .outputRange(-1.0, 0.3);
+        
 
     m_ArmMotor.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
   }

@@ -56,11 +56,11 @@ public class Robot extends TimedRobot {
     /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
     @Override
     public void autonomousInit() {
-
         // schedule the autonomous command (example)
         if (m_autonomousCommand != null) {
             m_autonomousCommand.schedule();
         }
+        m_robotContainer.setAuto(true);
     }
 
     /** This function is called periodically during autonomous. */
@@ -79,6 +79,7 @@ public class Robot extends TimedRobot {
         if (m_autonomousCommand != null) {
             m_autonomousCommand.cancel();
         }
+        m_robotContainer.setAuto(false);
         m_Elevator.configureElevatorBindings();
         // m_Intake.configureBindings();
         m_Arm.configureArmBindings();

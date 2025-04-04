@@ -145,7 +145,7 @@ public class Swerve extends SubsystemBase {
      * @return pose
      */
     public Pose2d getPose() {
-        SmartDashboard.putString("Get robot pose:  ", mOdometry.getPoseMeters().toString());
+        // SmartDashboard.putString("Get robot pose:  ", mOdometry.getPoseMeters().toString());
         return mOdometry.getPoseMeters();
     }
 

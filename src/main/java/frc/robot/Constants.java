@@ -137,6 +137,10 @@ public final class Constants {
         public static final double armMAXWhen = 0.619048;
         public static final double armMinimum = 0.619048;
 
+        public static final double ArmP = 2.65;
+        public static final double ArmI = 0.0;
+        public static final double ArmD = 0.0;
+
         public static final double armUp = 0.0;
         public static final double armMid = 0.2;
         public static final double armDown = 1.3;

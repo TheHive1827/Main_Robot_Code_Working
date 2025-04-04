@@ -34,4 +34,8 @@ public class RobotContainer {
     public void driveForwards(double speed) {
         mManualDriveCommand.drive(-1*speed);
     }
+
+    public void setAuto(boolean setAuto){
+        mManualDriveCommand.setAuto(setAuto);
+    }
 }
